@@ -100,7 +100,9 @@ def generate_synthetic_data(n_samples: int = 3000, random_state: int = 42) -> pd
         ["Employed", "Self-Employed", "Unemployed"], n_samples, p=[0.65, 0.25, 0.10]
     )
 
-    # Realistic approval logic
+    # Realistic approval logic (score centred at SCORE_THRESHOLD, spread SCORE_SCALE)
+    SCORE_THRESHOLD = 45
+    SCORE_SCALE = 10
     score = (
         (credit_score - 300) / 550 * 30
         + (applicant_income / 200000) * 20
@@ -112,7 +114,7 @@ def generate_synthetic_data(n_samples: int = 3000, random_state: int = 42) -> pd
         - existing_loans * 2
         - dependents * 1
     )
-    prob = 1 / (1 + np.exp(-(score - 45) / 10))
+    prob = 1 / (1 + np.exp(-(score - SCORE_THRESHOLD) / SCORE_SCALE))
     loan_approved = rng.random(n_samples) < prob
 
     df = pd.DataFrame(
@@ -146,11 +148,13 @@ def generate_synthetic_data(n_samples: int = 3000, random_state: int = 42) -> pd
 # ---------------------------------------------------------------------------
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
+    # Small epsilon to avoid division by zero in ratio features
+    EPSILON = 1
     df = df.copy()
     df["Total_Income"] = df["Applicant_Income"] + df["Coapplicant_Income"]
-    df["Income_to_Loan_Ratio"] = df["Total_Income"] / (df["Loan_Amount"] + 1)
-    df["Loan_to_Collateral_Ratio"] = df["Loan_Amount"] / (df["Collateral_Value"] + 1)
-    df["Savings_to_Loan_Ratio"] = df["Savings"] / (df["Loan_Amount"] + 1)
+    df["Income_to_Loan_Ratio"] = df["Total_Income"] / (df["Loan_Amount"] + EPSILON)
+    df["Loan_to_Collateral_Ratio"] = df["Loan_Amount"] / (df["Collateral_Value"] + EPSILON)
+    df["Savings_to_Loan_Ratio"] = df["Savings"] / (df["Loan_Amount"] + EPSILON)
     df["Credit_Score_Squared"] = df["Credit_Score"] ** 2
     df["DTI_Squared"] = df["DTI_Ratio"] ** 2
     return df

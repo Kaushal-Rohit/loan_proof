@@ -34,10 +34,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
 
       if (!data.success) {
-        errorBox.innerHTML =
-          "<strong>Please fix the following errors:</strong><ul>" +
-          data.errors.map((e) => `<li>${e}</li>`).join("") +
-          "</ul>";
+        // Build error list safely using DOM methods to prevent XSS
+        errorBox.innerHTML = "";
+        const strong = document.createElement("strong");
+        strong.textContent = "Please fix the following errors:";
+        const ul = document.createElement("ul");
+        ul.className = "mb-0 mt-1";
+        data.errors.forEach((msg) => {
+          const li = document.createElement("li");
+          li.textContent = msg;
+          ul.appendChild(li);
+        });
+        errorBox.appendChild(strong);
+        errorBox.appendChild(ul);
         errorBox.classList.remove("d-none");
         return;
       }

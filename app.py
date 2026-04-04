@@ -6,7 +6,7 @@ import os
 import json
 import sqlite3
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 
 import joblib
 import numpy as np
@@ -80,7 +80,7 @@ def save_prediction(name: str, prediction: str, probability: float, features: di
     conn.execute(
         "INSERT INTO predictions (timestamp, name, prediction, probability, features) VALUES (?,?,?,?,?)",
         (
-            datetime.utcnow().isoformat(timespec="seconds"),
+            datetime.now(timezone.utc).isoformat(timespec="seconds"),
             name or "Anonymous",
             prediction,
             round(probability, 4),
@@ -262,4 +262,4 @@ def clear_history():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=False, host="0.0.0.0", port=5000)
