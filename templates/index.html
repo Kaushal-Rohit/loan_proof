@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loan Eligibility Predictor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">🏦 Loan Predictor</a>
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link text-white" href="/dashboard">📊 Dashboard</a>
+      <a class="nav-link text-white" href="/history">📋 History</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Loan Eligibility Prediction</h4>
+          <small>Fill in your details below and click <strong>Predict</strong> to check eligibility.</small>
+        </div>
+        <div class="card-body">
+          <form id="predict-form" novalidate>
+            <!-- Applicant Name -->
+            <div class="mb-3">
+              <label class="form-label">Applicant Name <small class="text-muted">(optional)</small></label>
+              <input type="text" class="form-control" name="applicant_name" placeholder="e.g. John Doe"/>
+            </div>
+
+            <h6 class="text-primary border-bottom pb-1 mb-3">Personal Details</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Age <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Age" placeholder="25" min="18" max="100" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Gender <span class="text-danger">*</span></label>
+                <select class="form-select" name="Gender" required>
+                  <option value="">Select…</option>
+                  {% for g in genders %}
+                  <option value="{{ g }}">{{ g }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Marital Status <span class="text-danger">*</span></label>
+                <select class="form-select" name="Marital_Status" required>
+                  <option value="">Select…</option>
+                  {% for m in marital_statuses %}
+                  <option value="{{ m }}">{{ m }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Education Level <span class="text-danger">*</span></label>
+                <select class="form-select" name="Education_Level" required>
+                  <option value="">Select…</option>
+                  {% for e in education_levels %}
+                  <option value="{{ e }}">{{ e }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Dependents <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Dependents" placeholder="0" min="0" max="20" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Property Area <span class="text-danger">*</span></label>
+                <select class="form-select" name="Property_Area" required>
+                  <option value="">Select…</option>
+                  {% for p in property_areas %}
+                  <option value="{{ p }}">{{ p }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <h6 class="text-primary border-bottom pb-1 mb-3">Employment Details</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Employment Status <span class="text-danger">*</span></label>
+                <select class="form-select" name="Employment_Status" required>
+                  <option value="">Select…</option>
+                  {% for s in employment_statuses %}
+                  <option value="{{ s }}">{{ s }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Employer Category <span class="text-danger">*</span></label>
+                <select class="form-select" name="Employer_Category" required>
+                  <option value="">Select…</option>
+                  {% for c in employer_categories %}
+                  <option value="{{ c }}">{{ c }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Applicant Income (₹/yr) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Applicant_Income" placeholder="500000" min="0" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Co-applicant Income (₹/yr)</label>
+                <input type="number" class="form-control" name="Coapplicant_Income" placeholder="0" min="0" value="0"/>
+              </div>
+            </div>
+
+            <h6 class="text-primary border-bottom pb-1 mb-3">Loan &amp; Financial Details</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Loan Amount (₹) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Loan_Amount" placeholder="1000000" min="1000" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Loan Purpose <span class="text-danger">*</span></label>
+                <select class="form-select" name="Loan_Purpose" required>
+                  <option value="">Select…</option>
+                  {% for p in loan_purposes %}
+                  <option value="{{ p }}">{{ p }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Credit Score (300–850) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Credit_Score" placeholder="700" min="300" max="850" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">DTI Ratio (0–1) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="DTI_Ratio" placeholder="0.35" min="0" max="1" step="0.01" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Savings (₹) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Savings" placeholder="200000" min="0" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Existing Loans <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="Existing_Loans" placeholder="0" min="0" max="20" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Collateral Value (₹)</label>
+                <input type="number" class="form-control" name="Collateral_Value" placeholder="0" min="0" value="0"/>
+              </div>
+            </div>
+
+            <!-- Error display -->
+            <div id="error-box" class="alert alert-danger d-none"></div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                <span id="btn-text">🔍 Predict Eligibility</span>
+                <span id="btn-spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Result card (hidden initially) -->
+      <div id="result-card" class="card shadow-sm mt-4 d-none">
+        <div class="card-body text-center py-4">
+          <div id="result-icon" class="display-1 mb-2"></div>
+          <h3 id="result-title" class="fw-bold"></h3>
+          <p id="result-text" class="text-muted fs-5"></p>
+          <div class="progress mx-auto" style="height:20px;max-width:400px">
+            <div id="result-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
+          </div>
+          <small class="text-muted d-block mt-1" id="result-prob-label"></small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
